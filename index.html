@@ -1,0 +1,68 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Mobile Navigation Toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mainNav = document.querySelector('.main-nav');
+
+    if (navToggle && mainNav) {
+        navToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('nav-open');
+            const isExpanded = mainNav.classList.contains('nav-open');
+            navToggle.setAttribute('aria-expanded', isExpanded);
+            navToggle.classList.toggle('active'); // For hamburger animation
+        });
+    }
+
+    // Live Search/Filter (Simple Example - Case Insensitive)
+    const searchBar = document.getElementById('tool-search-bar');
+    const toolCards = document.querySelectorAll('.tool-card');
+    const toolCategories = document.querySelectorAll('.tool-category');
+
+    if (searchBar && toolCards.length > 0) {
+        searchBar.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            toolCards.forEach(card => {
+                const toolName = card.querySelector('h3').textContent.toLowerCase();
+                const toolDescription = card.querySelector('p').textContent.toLowerCase();
+                const isVisible = toolName.includes(searchTerm) || toolDescription.includes(searchTerm);
+                card.style.display = isVisible ? 'flex' : 'none'; // Use 'flex' to match display type
+            });
+
+            // Show/hide category sections based on visible cards
+            toolCategories.forEach(category => {
+                const visibleCardsInCategory = category.querySelectorAll('.tool-card[style*="display: flex"], .tool-card:not([style*="display: none"])'); // Checks for explicitly set flex or not hidden
+                if (searchTerm === "") { // If search is empty, show all categories
+                    category.style.display = 'block';
+                    // And ensure all cards are visible
+                    category.querySelectorAll('.tool-card').forEach(c => c.style.display = 'flex');
+                } else {
+                    category.style.display = visibleCardsInCategory.length > 0 ? 'block' : 'none';
+                }
+            });
+        });
+    }
+
+    // Set current year in footer
+    const currentYearSpan = document.getElementById('currentYear');
+    if (currentYearSpan) {
+        currentYearSpan.textContent = new Date().getFullYear();
+    }
+
+    // Smooth scroll for nav links (can be enhanced)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            // Only prevent default if it's an internal link, not for mailto or external
+            if (href.startsWith('#') && href.length > 1) {
+                e.preventDefault();
+                const targetElement = document.querySelector(href);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+
+});
