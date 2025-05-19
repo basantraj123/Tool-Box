@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TVM Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 600;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e6f0ff;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #004085;
+      text-align: center;
+      min-height: 50px;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 20px;
+      }
+      input, select {
+        font-size: 14px;
+      }
+      button {
+        font-size: 16px;
+      }
+      .result {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>TVM Calculator</h2>
+
+    <label for="calcType">Calculate:</label>
+    <select id="calcType" onchange="resetInputs()">
+      <option value="fv">Future Value (FV)</option>
+      <option value="pv">Present Value (PV)</option>
+      <option value="pmt">Payment (PMT)</option>
+      <option value="n">Number of Periods (N)</option>
+      <option value="i">Interest Rate (I/Y in %)</option>
+    </select>
+
+    <label for="presentValue">Present Value (PV) ₹</label>
+    <input type="number" id="presentValue" placeholder="Enter Present Value" step="any" />
+
+    <label for="payment">Payment (PMT) ₹ (per period)</label>
+    <input type="number" id="payment" placeholder="Enter Payment per period" step="any" />
+
+    <label for="rate">Interest Rate (I/Y) % (per period)</label>
+    <input type="number" id="rate" placeholder="Enter interest rate (%)" step="any" />
+
+    <label for="periods">Number of Periods (N)</label>
+    <input type="number" id="periods" placeholder="Enter number of periods" step="any" />
+
+    <label for="futureValue">Future Value (FV) ₹</label>
+    <input type="number" id="futureValue" placeholder="Enter Future Value" step="any" />
+
+    <button onclick="calculateTVM()">Calculate</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const calcTypeSelect = document.getElementById('calcType');
+    const pvInput = document.getElementById('presentValue');
+    const pmtInput = document.getElementById('payment');
+    const rateInput = document.getElementById('rate');
+    const nInput = document.getElementById('periods');
+    const fvInput = document.getElementById('futureValue');
+    const resultDiv = document.getElementById('result');
+
+    function resetInputs() {
+      // Enable all inputs first
+      pvInput.disabled = false;
+      pmtInput.disabled = false;
+      rateInput.disabled = false;
+      nInput.disabled = false;
+      fvInput.disabled = false;
+
+      // Clear previous result
+      resultDiv.textContent = '';
+
+      // Disable the input corresponding to the selected unknown (to calculate)
+      switch(calcTypeSelect.value) {
+        case 'fv': fvInput.disabled = true; fvInput.value = ''; break;
+        case 'pv': pvInput.disabled = true; pvInput.value = ''; break;
+        case 'pmt': pmtInput.disabled = true; pmtInput.value = ''; break;
+        case 'n': nInput.disabled = true; nInput.value = ''; break;
+        case 'i': rateInput.disabled = true; rateInput.value = ''; break;
+      }
+    }
+
+    resetInputs();
+
+    function calculateTVM() {
+      const pv = parseFloat(pvInput.value);
+      const pmt = parseFloat(pmtInput.value);
+      const ratePercent = parseFloat(rateInput.value);
+      const n = parseFloat(nInput.value);
+      const fv = parseFloat(fvInput.value);
+
+      if (isNaN(ratePercent)) {
+        alert('Please enter a valid Interest Rate');
+        return;
+      }
+      const rate = ratePercent / 100;
+
+      function round2(num) {
+        return Math.round(num * 100) / 100;
+      }
+
+      let output = '';
+
+      try {
+        switch(calcTypeSelect.value) {
+          case 'fv':
+            if (isNaN(pv) || isNaN(pmt) || isNaN(n)) {
+              alert('Please enter PV, PMT, and N');
+              return;
+            }
+            // FV formula for ordinary annuity + present value
+            // FV = PV*(1+r)^n + PMT*[( (1+r)^n -1 )/r]
+            const fvCalc = pv * Math.pow(1 + rate, n) + pmt * ((Math.pow(1 + rate, n) - 1) / rate);
+            output = `Future Value (FV) = ₹${round2(fvCalc)}`;
+            break;
+
+          case 'pv':
+            if (isNaN(fv) || isNaN(pmt) || isNaN(n)) {
+              alert('Please enter FV, PMT, and N');
+              return;
+            }
+            // PV formula rearranged:
+            // PV = (FV - PMT * [((1+r)^n -1)/r]) / (1+r)^n
+            const pvCalc = (fv - pmt * ((Math.pow(1 + rate, n) - 1) / rate)) / Math.pow(1 + rate, n);
+            output = `Present Value (PV) = ₹${round2(pvCalc)}`;
+            break;
+
+          case 'pmt':
+            if (isNaN(pv) || isNaN(fv) || isNaN(n)) {
+              alert('Please enter PV, FV, and N');
+              return;
+            }
+            // PMT formula:
+            // PMT = (FV - PV*(1+r)^n) * r / ((1+r)^n - 1)
+            const pmtCalc = ((fv - pv * Math.pow(1 + rate, n)) * rate) / (Math.pow(1 + rate, n) - 1);
+            output = `Payment (PMT) = ₹${round2(pmtCalc)}`;
+            break;
+
+          case 'n':
+            if (isNaN(pv) || isNaN(pmt) || isNaN(fv)) {
+              alert('Please enter PV, PMT, and FV');
+              return;
+            }
+            // Number of periods formula (approximate)
+            // n = ln( (PMT + r*FV) / (PMT + r*PV) ) / ln(1+r)
+            const numerator = Math.log((pmt + rate * fv) / (pmt + rate * pv));
+            const denominator = Math.log(1 + rate);
+            const nCalc = numerator / denominator;
+            output = `Number of Periods (N) = ${round2(nCalc)}`;
+            break;
+
+          case 'i':
+            if (isNaN(pv) || isNaN(pmt) || isNaN(fv) || isNaN(n)) {
+              alert('Please enter PV, PMT, FV, and N');
+              return;
+            }
+            // Interest rate calculation requires iterative approach
+            // We'll use the Newton-Raphson method to approximate
+
+            let guess = 0.05; // initial guess (5%)
+            let iterations = 0;
+            const maxIter = 1000;
+            const tol = 1e-7;
+
+            function f(r) {
+              return pv * Math.pow(1 + r, n) + pmt * ((Math.pow(1 + r, n) - 1) / r) - fv;
+            }
+            function fPrime(r
