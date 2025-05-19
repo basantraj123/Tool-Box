@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Palette Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px 25px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+    }
+    h2 {
+      color: #007bff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+    button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .palette {
+      margin-top: 25px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+    }
+    .color-block {
+      height: 80px;
+      border-radius: 8px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      text-shadow: 0 0 3px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .color-block:hover {
+      transform: scale(1.05);
+    }
+    .notice {
+      text-align: center;
+      margin-top: 15px;
+      color: #28a745;
+      font-weight: 600;
+      display: none;
+    }
+    @media (max-width: 480px) {
+      .color-block {
+        height: 60px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Palette Generator</h2>
+    <label for="baseColor">Choose Base Color</label>
+    <input type="color" id="baseColor" value="#007bff" />
+    <button onclick="generatePalette()">Generate Palette</button>
+    <div class="palette" id="palette"></div>
+    <div class="notice" id="copyNotice">Copied to clipboard!</div>
+  </div>
+
+  <script>
+    function shadeColor(color, percent) {
+      let f = parseInt(color.slice(1), 16),
+          t = percent < 0 ? 0 : 255,
+          p = Math.abs(percent),
+          R = f >> 16,
+          G = (f >> 8) & 0x00FF,
+          B = f & 0x0000FF;
+      return "#" + (
+        0x1000000 +
+        (Math.round((t - R) * p) + R) * 0x10000 +
+        (Math.round((t - G) * p) + G) * 0x100 +
+        (Math.round((t - B) * p) + B)
+      ).toString(16).slice(1);
+    }
+
+    function generatePalette() {
+      const baseColor = document.getElementById("baseColor").value;
+      const palette = document.getElementById("palette");
+      const notice = document.getElementById("copyNotice");
+      palette.innerHTML = "";
+      notice.style.display = "none";
+
+      const variations = [-0.5, -0.3, -0.15, 0, 0.15, 0.3, 0.5];
+
+      variations.forEach(p => {
+        const color = shadeColor(baseColor, p);
+        const block = document.createElement("div");
+        block.className = "color-block";
+        block.style.backgroundColor = color;
+        block.innerText = color;
+        block.onclick = () => {
+          navigator.clipboard.writeText(color);
+          notice.style.display = "block";
+          setTimeout(() => (notice.style.display = "none"), 1500);
+        };
+        palette.appendChild(block);
+      });
+    }
+
+    window.onload = generatePalette;
+  </script>
+</body>
+</html>
