@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI Calculator</title>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --light: #E3F2FD;
+      --white: #fff;
+      --radius: 12px;
+    }
+    body {
+      background: var(--light);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .container {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056c7;
+    }
+    .result {
+      margin-top: 1.5rem;
+      background: #f1faff;
+      border: 1px solid #cce5ff;
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-size: 1.1rem;
+      color: #333;
+      min-height: 3rem;
+    }
+    @media (max-width: 500px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧮 BMI Calculator</h2>
+    <input type="number" id="weight" placeholder="Weight (kg)" min="1" step="any" />
+    <input type="number" id="height" placeholder="Height (cm)" min="1" step="any" />
+    <button onclick="calculateBMI()">Calculate</button>
+    <div class="result" id="result">Enter your height and weight to calculate BMI.</div>
+  </div>
+
+  <script>
+    function calculateBMI() {
+      const weight = parseFloat(document.getElementById("weight").value);
+      const heightCm = parseFloat(document.getElementById("height").value);
+      const result = document.getElementById("result");
+
+      if (!weight || !heightCm || weight <= 0 || heightCm <= 0) {
+        result.textContent = "Please enter valid height and weight.";
+        return;
+      }
+
+      const heightM = heightCm / 100;
+      const bmi = weight / (heightM * heightM);
+      let category = "";
+
+      if (bmi < 18.5) category = "Underweight";
+      else if (bmi >= 18.5 && bmi < 24.9) category = "Normal";
+      else if (bmi >= 25 && bmi < 29.9) category = "Overweight";
+      else category = "Obese";
+
+      result.textContent = `Your BMI: ${bmi.toFixed(2)}\nCategory: ${category}`;
+    }
+  </script>
+</body>
+</html>
