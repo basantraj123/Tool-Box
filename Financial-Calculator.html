@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Financial Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 600;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e6f0ff;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #004085;
+      text-align: center;
+      min-height: 50px;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 20px;
+      }
+      input, select {
+        font-size: 14px;
+      }
+      button {
+        font-size: 16px;
+      }
+      .result {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Financial Calculator</h2>
+
+    <label for="calcType">Select Calculation</label>
+    <select id="calcType" onchange="resetResult()">
+      <option value="simpleInterest">Simple Interest</option>
+      <option value="compoundInterest">Compound Interest</option>
+      <option value="loanEMI">Loan EMI</option>
+    </select>
+
+    <label for="principal">Principal Amount (₹)</label>
+    <input type="number" id="principal" placeholder="Enter principal amount" min="0" />
+
+    <label for="rate">Annual Interest Rate (%)</label>
+    <input type="number" id="rate" placeholder="Enter annual interest rate" step="0.01" min="0" />
+
+    <label for="time">Time (years)</label>
+    <input type="number" id="time" placeholder="Enter time period in years" step="0.01" min="0" />
+
+    <div id="emiInputs" style="display:none;">
+      <label for="tenure">Loan Tenure (months)</label>
+      <input type="number" id="tenure" placeholder="Enter tenure in months" min="1" />
+    </div>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const calcTypeSelect = document.getElementById('calcType');
+    const emiInputsDiv = document.getElementById('emiInputs');
+    const timeInput = document.getElementById('time');
+
+    function resetResult() {
+      document.getElementById('result').textContent = '';
+      if (calcTypeSelect.value === 'loanEMI') {
+        emiInputsDiv.style.display = 'block';
+        timeInput.parentElement.style.display = 'none'; // Hide 'Time (years)'
+      } else {
+        emiInputsDiv.style.display = 'none';
+        timeInput.parentElement.style.display = 'block'; // Show 'Time (years)'
+      }
+    }
+
+    resetResult();
+
+    function calculate() {
+      const principal = parseFloat(document.getElementById('principal').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const time = parseFloat(document.getElementById('time').value);
+      const tenure = parseInt(document.getElementById('tenure').value);
+
+      if (isNaN(principal) || principal <= 0) {
+        alert('Please enter a valid Principal amount');
+        return;
+      }
+      if (isNaN(rate) || rate <= 0) {
+        alert('Please enter a valid Interest Rate');
+        return;
+      }
+
+      const calcType = calcTypeSelect.value;
+      let resultText = '';
+
+      if (calcType === 'simpleInterest') {
+        if (isNaN(time) || time <= 0) {
+          alert('Please enter a valid Time in years');
+          return;
+        }
+        const interest = (principal * rate * time) / 100;
+        const amount = principal + interest;
+        resultText = `Simple Interest: ₹${interest.toFixed(2)}\nTotal Amount: ₹${amount.toFixed(2)}`;
+      } 
+      else if (calcType === 'compoundInterest') {
+        if (isNaN(time) || time <= 0) {
+          alert('Please enter a valid Time in years');
+          return;
+        }
+        // Compounded annually
+        const amount = principal * Math.pow(1 + rate / 100, time);
+        const interest = amount - principal;
+        resultText = `Compound Interest: ₹${interest.toFixed(2)}\nTotal Amount: ₹${amount.toFixed(2)}`;
+      } 
+      else if (calcType === 'loanEMI') {
+        if (isNaN(tenure) || tenure <= 0) {
+          alert('Please enter a valid Loan Tenure in months');
+          return;
+        }
+        const monthlyRate = rate / (12 * 100);
+        const numerator = principal * monthlyRate * Math.pow(1 + monthlyRate, tenure);
+        const denominator = Math.pow(1 + monthlyRate, tenure) - 1;
+        const emi = numerator / denominator;
+        resultText = `Monthly EMI: ₹${emi.toFixed(2)}\nTotal Payment: ₹${(emi * tenure).toFixed(2)}\nTotal Interest Paid: ₹${((emi * tenure) - principal).toFixed(2)}`;
+      }
+
+      document.getElementById('result').textContent = resultText;
+    }
+  </script>
+</body>
+</html>
