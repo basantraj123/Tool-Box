@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,102,204,0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
+      background: #e6f2ff;
+      padding: 15px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Word & Character Counter</h1>
+    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+    <div class="results" id="results">
+      Words: 0 | Characters (with spaces): 0 | Characters (without spaces): 0
+    </div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('textInput');
+    const results = document.getElementById('results');
+
+    textInput.addEventListener('input', () => {
+      const text = textInput.value;
+      const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+      const charWithSpaces = text.length;
+      const charWithoutSpaces = text.replace(/\s/g, '').length;
+
+      results.textContent = `Words: ${words.length} | Characters (with spaces): ${charWithSpaces} | Characters (without spaces): ${charWithoutSpaces}`;
+    });
+  </script>
+</body>
+</html>
