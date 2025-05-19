@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Lock/Unlock</title>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --background: #E3F2FD;
+      --white: #ffffff;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--background);
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--primary);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    a.download-link {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔐 PDF Lock/Unlock</h2>
+
+    <input type="file" id="pdfFile" accept=".pdf" />
+    
+    <select id="action">
+      <option value="lock">Lock PDF (Encrypt)</option>
+      <option value="unlock">Unlock PDF (Decrypt)</option>
+    </select>
+
+    <input type="password" id="password" placeholder="Enter password" />
+
+    <button onclick="processPDF()">Process PDF</button>
+
+    <a id="downloadLink" class="download-link" download>Download Processed PDF</a>
+  </div>
+
+  <script>
+    async function processPDF() {
+      const fileInput = document.getElementById("pdfFile");
+      const action = document.getElementById("action").value;
+      const password = document.getElementById("password").value;
+      const downloadLink = document.getElementById("downloadLink");
+
+      if (!fileInput.files[0] || !password) {
+        return alert("Please select a PDF and enter a password.");
+      }
+
+      const file = fileInput.files[0];
+      const arrayBuffer = await file.arrayBuffer();
+      let pdfDoc;
+
+      if (action === "unlock") {
+        try {
+          pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, {
+            password: password
+          });
+        } catch (e) {
+          return alert("Incorrect password or PDF not encrypted.");
+        }
+      } else {
+        pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+      }
+
+      const bytes = await pdfDoc.save({
+        useObjectStreams: false,
+        ...(action === "lock" && { 
+          encrypt: {
+            userPassword: password,
+            ownerPassword: password,
+            permissions: {
+              printing: 'lowResolution',
+              modifying: false,
+              copying: false,
+            }
+          }
+        })
+      });
+
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = action === "lock" ? "locked.pdf" : "unlocked.pdf";
+      downloadLink.style.display = "inline-block";
+    }
+  </script>
+</body>
+</html>
