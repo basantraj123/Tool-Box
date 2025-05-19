@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gradient Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f8ff;
+    margin: 0;
+    padding: 20px;
+    color: #003366;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+  .container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px 25px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+  }
+  h2 {
+    color: #007bff;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 15px;
+  }
+  input[type="color"] {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-top: 10px;
+    box-sizing: border-box;
+  }
+  .gradient-preview {
+    margin-top: 30px;
+    height: 150px;
+    border-radius: 15px;
+    box-shadow: inset 0 0 10px rgba(0, 102, 204, 0.2);
+    transition: background 0.5s ease;
+  }
+  .css-code {
+    margin-top: 20px;
+    background: #e6f0ff;
+    padding: 15px;
+    border-radius: 10px;
+    font-family: monospace;
+    font-size: 16px;
+    color: #004085;
+    user-select: all;
+    cursor: pointer;
+  }
+  .copy-notice {
+    margin-top: 10px;
+    color: #007bff;
+    font-weight: 600;
+    text-align: center;
+    display: none;
+  }
+  @media (max-width: 480px) {
+    .container {
+      padding: 20px 15px;
+    }
+    input[type="color"], select {
+      height: 45px;
+      font-size: 14px;
+    }
+    .css-code {
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Gradient Generator</h2>
+    
+    <label for="color1">Start Color</label>
+    <input type="color" id="color1" value="#007bff" />
+
+    <label for="color2">End Color</label>
+    <input type="color" id="color2" value="#00d4ff" />
+
+    <label for="direction">Direction</label>
+    <select id="direction">
+      <option value="to right">Left to Right</option>
+      <option value="to left">Right to Left</option>
+      <option value="to bottom">Top to Bottom</option>
+      <option value="to top">Bottom to Top</option>
+      <option value="45deg">Diagonal 45°</option>
+      <option value="135deg">Diagonal 135°</option>
+    </select>
+
+    <div class="gradient-preview" id="gradientPreview"></div>
+
+    <div class="css-code" id="cssCode" title="Click to copy"></div>
+    <div class="copy-notice" id="copyNotice">CSS code copied!</div>
+  </div>
+
+  <script>
+    const color1 = document.getElementById('color1');
+    const color2 = document.getElementById('color2');
+    const direction = document.getElementById('direction');
+    const preview = document.getElementById('gradientPreview');
+    const cssCode = document.getElementById('cssCode');
+    const copyNotice = document.getElementById('copyNotice');
+
+    function updateGradient() {
+      const c1 = color1.value;
+      const c2 = color2.value;
+      const dir = direction.value;
+      const gradient = `linear-gradient(${dir}, ${c1}, ${c2})`;
+      preview.style.background = gradient;
+      cssCode.textContent = `background: ${gradient};`;
+      copyNotice.style.display = 'none';
+    }
+
+    // Copy CSS code on click
+    cssCode.addEventListener('click', () => {
+      navigator.clipboard.writeText(cssCode.textContent).then(() => {
+        copyNotice.style.display = 'block';
+        setTimeout(() => { copyNotice.style.display = 'none'; }, 1500);
+      });
+    });
+
+    color1.addEventListener('input', updateGradient);
+    color2.addEventListener('input', updateGradient);
+    direction.addEventListener('change', updateGradient);
+
+    // Initialize on load
+    updateGradient();
+  </script>
+</body>
+</html>
