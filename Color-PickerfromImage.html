@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color Picker from Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      align-items: flex-start;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 25px 30px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+      text-align: center;
+    }
+    h2 {
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      margin-bottom: 20px;
+    }
+    #imageCanvas {
+      max-width: 100%;
+      border-radius: 10px;
+      cursor: crosshair;
+      box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
+    }
+    .colorInfo {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .colorBox {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 2px solid #007bff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .colorText {
+      font-family: monospace;
+      color: #004085;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      .colorInfo {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Color Picker from Image</h2>
+    <input type="file" id="uploadImage" accept="image/*" />
+    <canvas id="imageCanvas"></canvas>
+    <div class="colorInfo" id="colorInfo" style="display:none;">
+      <div class="colorBox" id="colorBox"></div>
+      <div>
+        <div>HEX: <span class="colorText" id="hexCode"></span></div>
+        <div>RGB: <span class="colorText" id="rgbCode"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uploadInput = document.getElementById('uploadImage');
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorInfo = document.getElementById('colorInfo');
+    const colorBox = document.getElementById('colorBox');
+    const hexCode = document.getElementById('hexCode');
+    const rgbCode = document.getElementById('rgbCode');
+
+    let img = new Image();
+
+    uploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        img.onload = () => {
+          // Resize canvas to image size, max width 480px for responsiveness
+          const maxWidth = 480;
+          let scale = 1;
+          if (img.width > maxWidth) {
+            scale = maxWidth / img.width;
+          }
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          colorInfo.style.display = 'none';
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    canvas.addEventListener('click', (e) => {
+      if (!img.src) return;
+
+      const rect = canvas.getBoundingClientRect();
+      // Get click coordinates relative to canvas
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const [r, g, b, a] = pixel;
+
+      const rgb = `rgb(${r}, ${g}, ${b})`;
+      const hex = rgbToHex(r, g, b);
+
+      colorBox.style.backgroundColor = hex;
+      hexCode.textContent = hex;
+      rgbCode.textContent = rgb;
+      colorInfo.style.display = 'flex';
+    });
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
