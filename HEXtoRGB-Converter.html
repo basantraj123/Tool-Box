@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HEX to RGB Converter</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f8ff;
+    margin: 0;
+    padding: 20px;
+    color: #003366;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    align-items: center;
+  }
+  .container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px 25px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+    text-align: center;
+  }
+  h2 {
+    color: #007bff;
+    margin-bottom: 20px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 18px;
+    font-family: monospace;
+    box-sizing: border-box;
+  }
+  button {
+    margin-top: 18px;
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  .result {
+    margin-top: 25px;
+    font-family: monospace;
+    font-size: 20px;
+    color: #004085;
+  }
+  .colorBox {
+    margin: 15px auto 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    border: 2px solid #007bff;
+    box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
+  }
+  @media (max-width: 480px) {
+    .container {
+      padding: 20px 15px;
+    }
+    input[type="text"], button {
+      font-size: 16px;
+    }
+    .result {
+      font-size: 18px;
+    }
+    .colorBox {
+      width: 60px;
+      height: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>HEX to RGB Converter</h2>
+    <input type="text" id="hexInput" placeholder="#RRGGBB or #RGB" maxlength="7" />
+    <button onclick="convertHexToRgb()">Convert</button>
+    <div class="result" id="result"></div>
+    <div class="colorBox" id="colorBox" style="display:none;"></div>
+  </div>
+
+  <script>
+    function convertHexToRgb() {
+      const hexInput = document.getElementById('hexInput').value.trim();
+      const resultDiv = document.getElementById('result');
+      const colorBox = document.getElementById('colorBox');
+
+      // Validate hex input
+      const hexRegex = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
+      if (!hexRegex.test(hexInput)) {
+        resultDiv.textContent = 'Please enter a valid HEX color (#RGB or #RRGGBB)';
+        colorBox.style.display = 'none';
+        return;
+      }
+
+      // Convert 3-digit hex to 6-digit
+      let hex = hexInput.substring(1);
+      if (hex.length === 3) {
+        hex = hex.split('').map(ch => ch + ch).join('');
+      }
+
+      // Parse RGB values
+      const r = parseInt(hex.substring(0,2), 16);
+      const g = parseInt(hex.substring(2,4), 16);
+      const b = parseInt(hex.substring(4,6), 16);
+
+      resultDiv.textContent = `RGB(${r}, ${g}, ${b})`;
+      colorBox.style.backgroundColor = hexInput;
+      colorBox.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
