@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contrast Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      align-items: flex-start;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px 25px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+    }
+    h2 {
+      color: #007bff;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .preview {
+      margin-top: 20px;
+      padding: 25px;
+      border-radius: 10px;
+      font-size: 20px;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: inset 0 0 8px rgba(0, 102, 204, 0.2);
+    }
+    .result {
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #004085;
+    }
+    .pass {
+      color: green;
+      font-weight: bold;
+    }
+    .fail {
+      color: red;
+      font-weight: bold;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      .preview {
+        font-size: 18px;
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Contrast Checker</h2>
+    
+    <label for="bgColor">Background Color</label>
+    <input type="color" id="bgColor" value="#ffffff">
+
+    <label for="textColor">Text Color</label>
+    <input type="color" id="textColor" value="#000000">
+
+    <div class="preview" id="preview">Example Text</div>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const bgColorInput = document.getElementById('bgColor');
+    const textColorInput = document.getElementById('textColor');
+    const preview = document.getElementById('preview');
+    const result = document.getElementById('result');
+
+    function hexToRgb(hex) {
+      hex = hex.replace(/^#/, '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const bigint = parseInt(hex, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return [r, g, b];
+    }
+
+    function luminance(r, g, b) {
+      const a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928
+          ? v / 12.92
+          : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    }
+
+    function contrast(rgb1, rgb2) {
+      const lum1 = luminance(...rgb1);
+      const lum2 = luminance(...rgb2);
+      const brightest = Math.max(lum1, lum2);
+      const darkest = Math.min(lum1, lum2);
+      return ((brightest + 0.05) / (darkest + 0.05)).toFixed(2);
+    }
+
+    function update() {
+      const bgHex = bgColorInput.value;
+      const textHex = textColorInput.value;
+      const bgRgb = hexToRgb(bgHex);
+      const textRgb = hexToRgb(textHex);
+      const ratio = contrast(bgRgb, textRgb);
+
+      preview.style.backgroundColor = bgHex;
+      preview.style.color = textHex;
+
+      let aaNormal = ratio >= 4.5 ? "✅ <span class='pass'>Pass</span>" : "❌ <span class='fail'>Fail</span>";
+      let aaLarge = ratio >= 3.0 ? "✅ <span class='pass'>Pass</span>" : "❌ <span class='fail'>Fail</span>";
+      let aaaNormal = ratio >= 7.0 ? "✅ <span class='pass'>Pass</span>" : "❌ <span class='fail'>Fail</span>";
+      let aaaLarge = ratio >= 4.5 ? "✅ <span class='pass'>Pass</span>" : "❌ <span class='fail'>Fail</span>";
+
+      result.innerHTML = `
+        Contrast Ratio: <strong>${ratio}:1</strong><br>
+        WCAG AA (Normal Text): ${aaNormal}<br>
+        WCAG AA (Large Text): ${aaLarge}<br>
+        WCAG AAA (Normal Text): ${aaaNormal}<br>
+        WCAG AAA (Large Text): ${aaaLarge}
+      `;
+    }
+
+    bgColorInput.addEventListener('input', update);
+    textColorInput.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
