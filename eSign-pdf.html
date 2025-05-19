@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF eSign Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --light: #E3F2FD;
+      --white: #fff;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--light);
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--primary);
+    }
+
+    input, canvas, button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.6rem;
+      border-radius: var(--radius);
+      border: 1px solid #ccc;
+    }
+
+    canvas {
+      border: 1px solid #007BFF;
+      height: 150px;
+      touch-action: none;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    #pdfPreview {
+      width: 100%;
+      margin-top: 1rem;
+      height: 300px;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🖋️ Sign PDF</h2>
+    
+    <input type="file" id="pdfUpload" accept="application/pdf" />
+    
+    <canvas id="signatureCanvas"></canvas>
+    <button onclick="clearCanvas()">Clear Signature</button>
+    
+    <button onclick="signPDF()">Add Signature & Download</button>
+    
+    <iframe id="pdfPreview"></iframe>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.addEventListener("mousedown", (e) => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (drawing) {
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      ctx.beginPath();
+      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      drawing = true;
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      if (drawing) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", () => drawing = false);
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    async function signPDF() {
+      const fileInput = document.getElementById("pdfUpload");
+      if (!fileInput.files[0]) return alert("Please upload a PDF.");
+
+      const existingPdfBytes = await fileInput.files[0].arrayBuffer();
+      const signatureImage = canvas.toDataURL("image/png");
+
+      const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+      const pngImage = await pdfDoc.embedPng(signatureImage);
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+
+      const { width, height } = firstPage.getSize();
+      firstPage.drawImage(pngImage, {
+        x: width / 2 - 100,
+        y: 50,
+        width: 200,
+        height: 75,
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const preview = document.getElementById("pdfPreview");
+      preview.src = url;
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "signed.pdf";
+      a.click();
+    }
+  </script>
+</body>
+</html>
