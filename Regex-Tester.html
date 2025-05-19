@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regex Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+      font-family: monospace;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    button {
+      margin-top: 18px;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      background: #e6f0ff;
+      padding: 15px;
+      border-radius: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: #004085;
+      min-height: 60px;
+    }
+    .highlight {
+      background-color: #ffd54f;
+      font-weight: 700;
+      color: #000;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+      input[type="text"], textarea, button {
+        font-size: 14px;
+      }
+      .result {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Regex Tester</h2>
+
+    <label for="regexInput">Regular Expression</label>
+    <input type="text" id="regexInput" placeholder="e.g. ^\d{3}-\d{2}-\d{4}$" />
+
+    <label for="flagsInput">Flags (e.g. g, i, m)</label>
+    <input type="text" id="flagsInput" placeholder="Optional flags" maxlength="3" />
+
+    <label for="testString">Test String</label>
+    <textarea id="testString" placeholder="Enter text to test against regex"></textarea>
+
+    <button onclick="testRegex()">Test Regex</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+    }
+
+    function testRegex() {
+      const pattern = document.getElementById('regexInput').value;
+      const flags = document.getElementById('flagsInput').value;
+      const testStr = document.getElementById('testString').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!pattern) {
+        alert('Please enter a regular expression pattern.');
+        return;
+      }
+
+      let regex;
+      try {
+        regex = new RegExp(pattern, flags);
+      } catch (e) {
+        resultDiv.textContent = 'Invalid regex: ' + e.message;
+        return;
+      }
+
+      if (!testStr) {
+        alert('Please enter a test string.');
+        return;
+      }
+
+      // Escape HTML to avoid injection
+      const safeStr = escapeHtml(testStr);
+
+      if (!flags.includes('g')) {
+        // If no global flag, just test once
+        const match = regex.exec(testStr);
+        if (!match) {
+          resultDiv.textContent = 'No match found.';
+          return;
+        }
+
+        // Highlight first match
+        const start = match.index;
+        const end = start + match[0].length;
+
+        const before = safeStr.slice(0, start);
+        const matched = safeStr.slice(start, end);
+        const after = safeStr.slice(end);
+
+        resultDiv.innerHTML = before + '<span class="highlight">' + matched + '</span>' + after;
+        return;
+      } else {
+        // Global flag, find all matches and highlight them
+        let match;
+        let lastIndex = 0;
+        let resultHtml = '';
+        regex.lastIndex = 0; // reset
+
+        const matches = [];
+        while ((match = regex.exec(testStr)) !== null) {
+          matches.push({ index: match.index, length: match[0].length });
+          if (match[0].length === 0) {
+            regex.lastIndex++;
+          }
+        }
+
+        if (matches.length === 0) {
+          resultDiv.textContent = 'No matches found.';
+          return;
+        }
+
+        let currentPos = 0;
+        matches.forEach(({index, length}) => {
+          const beforeMatch = safeStr.slice(currentPos, index);
+          const matchText = safeStr.slice(index, index + length);
+          resultHtml += beforeMatch + '<span class="highlight">' + matchText + '</span>';
+          currentPos = index + length;
+        });
+        // Append remaining text after last match
+        resultHtml += safeStr.slice(currentPos);
+
+        resultDiv.innerHTML = resultHtml;
+      }
+    }
+  </script>
+</body>
+</html>
