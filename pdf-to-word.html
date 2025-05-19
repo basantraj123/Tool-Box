@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF ↔ Word Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.5.1/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary-blue: #007BFF;
+      --light-blue: #E3F2FD;
+      --white: #FFFFFF;
+      --border-radius: 12px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--light-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--primary-blue);
+      margin-bottom: 1rem;
+    }
+
+    input[type="file"], select {
+      margin: 1rem 0;
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      background: var(--primary-blue);
+      color: var(--white);
+      border: none;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      width: 100%;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    #output {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      background: #f9f9f9;
+      max-height: 300px;
+      overflow: auto;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>PDF ↔ Word Converter</h2>
+    <select id="mode">
+      <option value="pdf-to-word">PDF to Word</option>
+      <option value="word-to-pdf">Word to PDF</option>
+    </select>
+
+    <input type="file" id="fileInput" accept=".pdf,.docx" />
+    <button class="btn" onclick="convert()">Convert</button>
+
+    <div id="output" style="display: none;"></div>
+    <button class="btn" id="downloadBtn" style="display: none;" onclick="download()">Download</button>
+  </div>
+
+  <script>
+    let convertedText = '';
+
+    async function convert() {
+      const mode = document.getElementById('mode').value;
+      const file = document.getElementById('fileInput').files[0];
+      const output = document.getElementById('output');
+      const downloadBtn = document.getElementById('downloadBtn');
+
+      if (!file) {
+        alert("Please upload a file.");
+        return;
+      }
+
+      output.style.display = 'block';
+      output.innerHTML = "Processing...";
+
+      if (mode === 'pdf-to-word') {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          const typedArray = new Uint8Array(reader.result);
+          const pdf = await pdfjsLib.getDocument(typedArray).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const strings = content.items.map(item => item.str).join(' ');
+            text += strings + '\n\n';
+          }
+          convertedText = text;
+          output.textContent = text;
+          downloadBtn.style.display = 'block';
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      if (mode === 'word-to-pdf') {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          mammoth.convertToHtml({ arrayBuffer: event.target.result })
+            .then(result => {
+              output.innerHTML = result.value;
+              convertedText = result.value;
+              downloadBtn.style.display = 'block';
+            })
+            .catch(err => {
+              output.innerHTML = "Error converting Word document.";
+              console.error(err);
+            });
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    }
+
+    function download() {
+      const mode = document.getElementById('mode').value;
+      if (mode === 'pdf-to-word') {
+        const blob = new Blob([convertedText], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'converted.doc';
+        link.click();
+      } else if (mode === 'word-to-pdf') {
+        const element = document.getElementById('output');
+        html2pdf().from(element).save('converted.pdf');
+      }
+    }
+  </script>
+
+</body>
+</html>
