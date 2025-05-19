@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta Tag Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,102,204,0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    input[type="url"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    pre {
+      margin-top: 30px;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Meta Tag Analyzer</h1>
+    <input type="url" id="urlInput" placeholder="Enter a full URL (https://...)" />
+    <button onclick="analyzeMetaTags()">Analyze</button>
+    <pre id="output"></pre>
+  </div>
+
+  <script>
+    async function analyzeMetaTags() {
+      const url = document.getElementById('urlInput').value;
+      const output = document.getElementById('output');
+      output.textContent = 'Analyzing...';
+
+      try {
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        const res = await fetch(proxyUrl);
+        const data = await res.json();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+
+        const metas = doc.getElementsByTagName('meta');
+        let result = '';
+
+        for (let meta of metas) {
+          const name = meta.getAttribute('name') || meta.getAttribute('property') || 'N/A';
+          const content = meta.getAttribute('content') || 'N/A';
+          result += `Name/Property: ${name}\nContent: ${content}\n\n`;
+        }
+
+        output.textContent = result || 'No meta tags found.';
+      } catch (error) {
+        output.textContent = 'Error fetching meta tags. Make sure the URL is valid and supports CORS.';
+      }
+    }
+  </script>
+</body>
+</html>
