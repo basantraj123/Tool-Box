@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Reverser</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 48%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      .buttons {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Text Reverser</h2>
+    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+    <div class="buttons">
+      <button onclick="reverseText('chars')">Reverse Characters</button>
+      <button onclick="reverseText('words')">Reverse Words</button>
+    </div>
+  </div>
+
+  <script>
+    function reverseText(type) {
+      const textarea = document.getElementById('textInput');
+      const text = textarea.value;
+      if (type === 'chars') {
+        textarea.value = text.split('').reverse().join('');
+      } else if (type === 'words') {
+        textarea.value = text.split(/\s+/).reverse().join(' ');
+      }
+    }
+  </script>
+</body>
+</html>
