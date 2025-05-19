@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color Picker & Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+    .container {
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+      text-align: center;
+    }
+    h2 {
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    input[type="color"] {
+      width: 100px;
+      height: 100px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+      border-radius: 12px;
+    }
+    .outputs {
+      font-size: 16px;
+      text-align: left;
+      margin-top: 10px;
+      background: #f9faff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .color-box {
+      width: 100%;
+      height: 60px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+    }
+    @media (max-width: 500px) {
+      .container {
+        max-width: 100%;
+      }
+      input[type="color"] {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Color Picker & Converter</h2>
+    <input type="color" id="colorPicker" value="#007bff" />
+    <div class="color-box" id="colorBox" style="background:#007bff;"></div>
+    <div class="outputs">
+      <div><strong>HEX:</strong> <span id="hex">#007bff</span></div>
+      <div><strong>RGB:</strong> <span id="rgb">rgb(0, 123, 255)</span></div>
+      <div><strong>HSL:</strong> <span id="hsl">hsl(210, 100%, 50%)</span></div>
+    </div>
+  </div>
+
+  <script>
+    const colorPicker = document.getElementById('colorPicker');
+    const colorBox = document.getElementById('colorBox');
+    const hexSpan = document.getElementById('hex');
+    const rgbSpan = document.getElementById('rgb');
+    const hslSpan = document.getElementById('hsl');
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if(hex.length === 3){
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const bigint = parseInt(hex, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return { r, g, b };
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if(max === min) {
+        h = s = 0; // achromatic
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+      };
+    }
+
+    function updateColorInfo() {
+      const hex = colorPicker.value.toLowerCase();
+      colorBox.style.backgroundColor = hex;
+      hexSpan.textContent = hex;
+
+      const {r, g, b} = hexToRgb(hex);
+      rgbSpan.textContent = `rgb(${r}, ${g}, ${b})`;
+
+      const {h, s, l} = rgbToHsl(r, g, b);
+      hslSpan.textContent = `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    colorPicker.addEventListener('input', updateColorInfo);
+
+    // Initialize
+    updateColorInfo();
+  </script>
+</body>
+</html>
