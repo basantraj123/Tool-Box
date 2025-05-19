@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator & Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.9/minified/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,102,204,0.2);
+    }
+    h1, h2 {
+      text-align: center;
+      color: #007bff;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 15px;
+    }
+    button {
+      margin-top: 15px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+    }
+    #reader {
+      width: 100%;
+      margin-top: 20px;
+    }
+    #qr-result {
+      margin-top: 15px;
+      padding: 12px;
+      background: #e6f2ff;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QR Code Generator</h1>
+    <textarea id="qrText" placeholder="Enter text or URL to generate QR code..."></textarea>
+    <button onclick="generateQR()">Generate QR Code</button>
+    <canvas id="qrCanvas"></canvas>
+
+    <h2>QR Code Scanner</h2>
+    <div id="reader"></div>
+    <div id="qr-result"></div>
+  </div>
+
+  <script>
+    function generateQR() {
+      const canvas = document.getElementById('qrCanvas');
+      const text = document.getElementById('qrText').value;
+      QRCode.toCanvas(canvas, text, { width: 250 }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+
+    const resultContainer = document.getElementById('qr-result');
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        const cameraId = devices[0].id;
+        html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: 250 },
+          decodedText => {
+            resultContainer.textContent = `Scanned Result: ${decodedText}`;
+            html5QrCode.stop();
+          },
+          errorMessage => {}
+        );
+      }
+    }).catch(err => {
+      resultContainer.textContent = 'Camera not accessible or permission denied.';
+    });
+  </script>
+</body>
+</html>
