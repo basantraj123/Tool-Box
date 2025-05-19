@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Math Solver</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      color: #003366;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,102,204,0.2);
+    }
+    h1 {
+      color: #007bff;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-sizing: border-box;
+    }
+    input {
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 25px;
+      background: #e6f2ff;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 20px;
+      text-align: center;
+      min-height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Math Solver</h1>
+    <input type="text" id="expression" placeholder="Enter expression, e.g., 2+3*4 or sin(30)" />
+    <button onclick="solveMath()">Solve</button>
+    <div id="output">Result will appear here</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+  <script>
+    function solveMath() {
+      const expr = document.getElementById('expression').value;
+      const output = document.getElementById('output');
+      try {
+        const result = math.evaluate(expr);
+        output.textContent = `Result: ${result}`;
+      } catch (err) {
+        output.textContent = "Invalid expression!";
+      }
+    }
+  </script>
+</body>
+</html>
