@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image to Text (OCR)</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --primary-blue: #007BFF;
+      --light-blue: #E3F2FD;
+      --white: #FFFFFF;
+      --border-radius: 12px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--light-blue);
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--primary-blue);
+      margin-bottom: 1rem;
+    }
+
+    input[type=file] {
+      margin: 1rem 0;
+    }
+
+    .btn {
+      background: var(--primary-blue);
+      color: white;
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 1rem;
+      border-radius: var(--border-radius);
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+
+    .loading {
+      margin-top: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Image to Text</h2>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button class="btn" onclick="extractText()">Extract Text</button>
+    <p class="loading" id="loading" style="display: none;">Processing image...</p>
+    <textarea id="outputText" placeholder="Extracted text will appear here..."></textarea>
+  </div>
+
+  <script>
+    function extractText() {
+      const input = document.getElementById('imageInput');
+      const output = document.getElementById('outputText');
+      const loading = document.getElementById('loading');
+
+      if (!input.files[0]) {
+        alert('Please upload an image.');
+        return;
+      }
+
+      loading.style.display = 'block';
+      output.value = '';
+
+      Tesseract.recognize(
+        input.files[0],
+        'eng',
+        {
+          logger: m => console.log(m)
+        }
+      ).then(({ data: { text } }) => {
+        loading.style.display = 'none';
+        output.value = text;
+      }).catch(err => {
+        loading.style.display = 'none';
+        output.value = 'Error reading text: ' + err;
+      });
+    }
+  </script>
+
+</body>
+</html>
