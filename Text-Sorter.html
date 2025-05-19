@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Sorter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #003366;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 48%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      .buttons {
+        flex-direction: column;
+      }
+      button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Text Sorter</h2>
+    <textarea id="textInput" placeholder="Paste or type your text here..."></textarea>
+    <div class="buttons">
+      <button onclick="sortLines('asc')">Sort A → Z</button>
+      <button onclick="sortLines('desc')">Sort Z → A</button>
+    </div>
+  </div>
+
+  <script>
+    function sortLines(order) {
+      const textarea = document.getElementById('textInput');
+      const lines = textarea.value.split('\n');
+      lines.sort((a, b) => a.localeCompare(b));
+      if (order === 'desc') lines.reverse();
+      textarea.value = lines.join('\n');
+    }
+  </script>
+</body>
+</html>
