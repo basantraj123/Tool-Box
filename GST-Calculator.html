@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GST Calculator</title>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --light: #E3F2FD;
+      --white: #fff;
+      --radius: 12px;
+    }
+    body {
+      background: var(--light);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .container {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: var(--radius);
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      width: 48%;
+      padding: 0.8rem;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin: 0 1% 1rem 1%;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #0056c7;
+    }
+    .result {
+      background: #f1faff;
+      border: 1px solid #cce5ff;
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      color: #333;
+      min-height: 4rem;
+      white-space: pre-line;
+    }
+    @media (max-width: 500px) {
+      button {
+        width: 100%;
+        margin: 0 0 1rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>GST Calculator</h2>
+    <input type="number" id="amount" placeholder="Enter amount" min="0" step="any" />
+    <input type="number" id="gst" placeholder="Enter GST % (e.g., 18)" min="0" step="any" />
+    <div>
+      <button onclick="calculateGST()">Calculate</button>
+      <button onclick="clearFields()">Clear</button>
+    </div>
+    <div class="result" id="result">Enter amount and GST percentage above.</div>
+  </div>
+
+  <script>
+    function calculateGST() {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const gstPercent = parseFloat(document.getElementById('gst').value);
+      const result = document.getElementById('result');
+
+      if (isNaN(amount) || amount <= 0) {
+        result.textContent = 'Please enter a valid amount.';
+        return;
+      }
+      if (isNaN(gstPercent) || gstPercent < 0) {
+        result.textContent = 'Please enter a valid GST percentage.';
+        return;
+      }
+
+      const gstAmount = (amount * gstPercent) / 100;
+      const totalWithGST = amount + gstAmount;
+      const priceBeforeGST = amount / (1 + gstPercent / 100);
+
+      result.textContent =
+        `GST Amount: ₹${gstAmount.toFixed(2)}\n` +
+        `Total Price (with GST): ₹${totalWithGST.toFixed(2)}\n` +
+        `Price Before GST: ₹${priceBeforeGST.toFixed(2)}`;
+    }
+
+    function clearFields() {
+      document.getElementById('amount').value = '';
+      document.getElementById('gst').value = '';
+      document.getElementById('result').textContent = 'Enter amount and GST percentage above.';
+    }
+  </script>
+</body>
+</html>
